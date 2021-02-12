@@ -8,7 +8,7 @@ class Map
     {
         private:
         vector < vector<char> > map;
-        int dimX, dimY;
+        int dimX, dimY;//hello its Ganna
 
         public:
         Map(int dimx, int dimy);
