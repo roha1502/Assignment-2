@@ -99,7 +99,7 @@ char Mars::getObject(int x, int y) {
 }
 
 //
-// place an object to a specific coordinate
+// place an object at a specific coordinate
 void Mars::setObject(int x, int y, char obj) {
     map[y-1][x-1] = obj;
     //cout << "the object '" << obj << "' should be at row " << x << ", column " << y << endl;
