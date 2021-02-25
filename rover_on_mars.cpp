@@ -34,7 +34,7 @@ void Mars::init() {
     dimY = 15;
 
     char objects[] = {' ', ' ', ' ', ' ', ' ', ' ',
-                      'X', '#', '@', '$'};
+                      '@', '#', '#', '$'};
 
     map.resize(dimY); // create dimY rows
     for (int i=0; i<dimY; i++)
@@ -135,9 +135,15 @@ class Rover {
         void land(Mars &mars);
         char getHeading();
         void getRoverLocation();
-        void moveRover(Mars &mars, Rover &rover);
-        void turnRoverRight(Mars &mars, Rover &rover);
-        void turnRoverLeft(Mars &mars, Rover &rover);
+        char moveRover(Mars &mars, Rover &rover, char &input, int &gold);
+        void moveRoverGod(Mars &mars, Rover &rover);
+        void generateGold(Mars &mars, Rover &rover);
+        void turnRoverRight(Mars &mars, Rover &rover, int &gold);
+        void turnRoverLeft(Mars &mars, Rover &rover, int &gold);
+        bool isTrap(Mars &mars, Rover &rover);
+        bool checkPath(Mars &mars, Rover &rover);
+        bool isGold(Mars &mars, Rover &rover, int &gold);
+
 };
 
 //
@@ -165,56 +171,113 @@ void Rover::getRoverLocation() {
 }
 
 //
-// move the rover (if no obstructions)
-void Rover::moveRover(Mars &mars, Rover &rover) {
-    bool temp = false;
+// is the cell in front of the rover empty, a gold, or a trap ?
+bool Rover::checkPath(Mars &mars, Rover &rover) {
     switch(heading) {
             case '^':
-                if (mars.isEmpty(x,y+1) && mars.isInsideMap(x, y+1)) {
-                    mars.setObject(x, y, ' ');
-                    y++;
-                    mars.setObject(x, y, heading);
-                    temp = true;
-                }
+                if (mars.isEmpty(x,y+1) && mars.isInsideMap(x, y+1))
+                    return true;
+                else
+                    return false;
             break;
             case 'v':
-                if (mars.isEmpty(x,y-1) && mars.isInsideMap(x, y-1)) {
-                    mars.setObject(x, y, ' ');
-                    y--;
-                    mars.setObject(x, y, heading);
-                    temp = true;
-                }
+                if (mars.isEmpty(x,y-1) && mars.isInsideMap(x, y-1)) 
+                    return true;
+                else
+                    return false;
             break;
             case '>':
-                if (mars.isEmpty(x+1,y) && mars.isInsideMap(x+1, y)) {
-                    mars.setObject(x, y, ' ');
-                    x++;
-                    mars.setObject(x, y, heading);
-                    temp = true;
-                }
+                if (mars.isEmpty(x+1,y) && mars.isInsideMap(x+1, y))
+                    return true;
+                else
+                    return false;
             break;
             case '<':
-                if (mars.isEmpty(x-1,y) && mars.isInsideMap(x-1, y)) {
-                    mars.setObject(x, y, ' ');
-                    x--;
-                    mars.setObject(x, y, heading);
-                    temp = true;
-                }
+                if (mars.isEmpty(x-1,y) && mars.isInsideMap(x-1, y))
+                    return true;
+                else
+                    return false;
             break;
-        }
-        if (temp) {
+    }
+    return false;
+}
+
+bool askForRestart();
+
+//
+// move the rover (if no obstructions)
+char Rover::moveRover(Mars &mars, Rover &rover, char &input_, int &gold) {
+    if (rover.isTrap(mars,rover)) {
+        if (!askForRestart())
+            input_ = 'q';
+    }
+    else {
+        if (rover.checkPath(mars,rover) || rover.isGold(mars,rover,gold)) {
+            switch(heading) {
+                    case '^':
+                        mars.setObject(x, y, ' ');
+                        y++;
+                        mars.setObject(x, y, heading);
+                    break;
+                    case 'v':
+                        mars.setObject(x, y, ' ');
+                        y--;
+                        mars.setObject(x, y, heading);
+                    break;
+                    case '>':
+                        mars.setObject(x, y, ' ');
+                        x++;
+                        mars.setObject(x, y, heading);
+                    break;
+                    case '<':
+                        mars.setObject(x, y, ' ');
+                        x--;
+                        mars.setObject(x, y, heading);
+                    break;
+            }
             mars.display();
             rover.getRoverLocation();
             cout << "current heading is [" << rover.getHeading() << "]" << "\n\n";
+            cout << "current gold collected = " << gold << endl;
         }
-        else
-            cout << "object at row " << x << ", column " << y+1 << " is [" << mars.getObject(x,y+1) << "]\n" 
-                 << "invalid movement !\n";
+    else
+        cout << "object at row " << x << ", column " << y+1 << " is [" << mars.getObject(x,y+1) << "]\n" 
+            << "invalid movement !\n";
+    }
+
+    return input_;
+}
+
+//
+// move the rover with disregard for any objects (for gold generation)
+void Rover::moveRoverGod(Mars &mars, Rover &rover) {
+    switch(heading) {
+        case '^':
+            mars.setObject(x, y, ' ');
+            y++;
+            mars.setObject(x, y, heading);
+        break;
+        case 'v':
+            mars.setObject(x, y, ' ');
+            y--;
+            mars.setObject(x, y, heading);
+        break;
+        case '>':
+            mars.setObject(x, y, ' ');
+            x++;
+            mars.setObject(x, y, heading);
+        break;
+        case '<':
+            mars.setObject(x, y, ' ');
+            x--;
+            mars.setObject(x, y, heading);
+        break;
+    }
 }
 
 //
 // turn rover right
-void Rover::turnRoverRight(Mars &mars, Rover &rover) {
+void Rover::turnRoverRight(Mars &mars, Rover &rover, int &gold) {
     switch(heading) {
             case '^':
                 heading = '>';
@@ -233,11 +296,12 @@ void Rover::turnRoverRight(Mars &mars, Rover &rover) {
     mars.display();
     rover.getRoverLocation();
     cout << "current heading is [" << rover.getHeading() << "]" << "\n\n";
+    cout << "current gold collected = " << gold << endl;
 }
 
 //
 // turn rover left
-void Rover::turnRoverLeft(Mars &mars, Rover &rover) {
+void Rover::turnRoverLeft(Mars &mars, Rover &rover, int &gold) {
     switch(heading) {
             case '^':
                 heading = '<';
@@ -256,11 +320,113 @@ void Rover::turnRoverLeft(Mars &mars, Rover &rover) {
     mars.display();
     rover.getRoverLocation();
     cout << "current heading is [" << rover.getHeading() << "]" << "\n\n";
+    cout << "current gold collected = " << gold << endl;
+}
+
+//
+// is the cell at (x,y) a trap ? game over if yes
+bool Rover::isTrap(Mars &mars, Rover &rover) {
+    bool temp = false;
+    switch(heading) {
+            case '^':
+                if (mars.getObject(x,y+1) == '@'){
+                    cout << "you've driven the rover into a trap !\ngame over !\n";
+                    temp = true;
+                }
+            break;
+            case 'v':
+                if (mars.getObject(x,y-1) == '@'){
+                    cout << "you've driven the rover into a trap !\ngame over !\n";
+                    temp = true;
+                }
+            break;
+            case '>':
+                if (mars.getObject(x+1,y) == '@'){
+                    cout << "you've driven the rover into a trap !\ngame over !\n";
+                    temp = true;
+                }
+            break;
+            case '<':
+                if (mars.getObject(x-1,y) == '@') {
+                    cout << "you've driven the rover into a trap !\ngame over !\n";
+                    temp = true;
+                }
+            break;
+    }
+    if (temp==true)
+        return true;
+    else
+        return false;
+}
+
+//
+//
+bool Rover::isGold(Mars &mars, Rover &rover, int &gold) {
+    bool temp = false;
+    switch(heading) {
+            case '^':
+                if (mars.getObject(x,y+1) == '$'){
+                    gold++;
+                    temp = true;
+                }
+            break;
+            case 'v':
+                if (mars.getObject(x,y-1) == '$'){
+                    gold++;
+                    temp = true;
+                }
+            break;
+            case '>':
+                if (mars.getObject(x+1,y) == '$'){
+                    gold++;
+                    temp = true;
+                }
+            break;
+            case '<':
+                if (mars.getObject(x-1,y) == '$') {
+                    gold++;
+                    temp = true;
+                }
+            break;
+    }
+    if (temp==true)
+        return true;
+    else
+        return false;
+}
+
+//
+// generate gold
+void Rover::generateGold(Mars &mars, Rover &rover) {
+    int tempX = x, tempY = y;
+    for (int i=0; i<5; i++) {
+        rover.moveRoverGod(mars,rover);
+        rover.moveRoverGod(mars,rover);
+        mars.setObject(x+1,y+1,'$');
+    }
+    x = tempX;
+    y = tempY;
+}
+
+void startGame();
+
+//
+// restart game ?
+bool askForRestart() {
+    char input;
+    cout << "would you like to try again ?\n==> ";
+    cin >> input;
+    if (tolower(input) == 'y') {
+        startGame(); 
+        return true;
+    }
+    else
+        return false;
 }
 
 //
 // get user input
-void getInput(Mars &mars, Rover &rover) {
+void getInput(Mars &mars, Rover &rover, int &gold) {
     int x = mars.getDimX(), y = mars.getDimY();
     char input;
 
@@ -271,13 +437,13 @@ void getInput(Mars &mars, Rover &rover) {
 
         switch(input)   {
             case 'm':
-                rover.moveRover(mars,rover);
+                rover.moveRover(mars,rover,input,gold);
             break;
             case 'r':
-                rover.turnRoverRight(mars,rover);
+                rover.turnRoverRight(mars,rover,gold);
             break;
             case 'l':
-                rover.turnRoverLeft(mars,rover);
+                rover.turnRoverLeft(mars,rover,gold);
             break;
             case 'q':
 
@@ -286,18 +452,28 @@ void getInput(Mars &mars, Rover &rover) {
     }
 }
 
-int main() {
-    srand(time(NULL));
+void startGame() {
+    int gold = 0;
     Mars mars;
     Rover rover;
 
     rover.land(mars);
+
+    //rover.generateGold(mars,rover);
+    //rover.land(mars);
     mars.display();
 
     rover.getRoverLocation();
     cout << "current heading is [" << rover.getHeading() << "]" << "\n\n";
+    cout << "current gold collected = " << gold << endl;
 
-    getInput(mars, rover);
+    getInput(mars, rover,gold);
+}
+
+int main() {
+    srand(time(NULL));
+    
+    startGame();
 
     return 0;
 }
