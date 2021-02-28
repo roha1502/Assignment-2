@@ -34,7 +34,7 @@ void Mars::init() {
     dimY = 15;
 
     char objects[] = {' ', ' ', ' ', ' ', ' ', ' ',
-                      '@', '#', '#', '$'};
+                      '@', '#', '#', ' '};
 
     map.resize(dimY); // create dimY rows
     for (int i=0; i<dimY; i++)
@@ -251,26 +251,45 @@ char Rover::moveRover(Mars &mars, Rover &rover, char &input_, int &gold) {
 //
 // move the rover with disregard for any objects (for gold generation)
 void Rover::moveRoverGod(Mars &mars, Rover &rover) {
+    char objects[] = {'$', ' ', ' ', ' ', ' ', ' ',
+                      ' ', ' ', ' ', ' '};
+
     switch(heading) {
         case '^':
-            mars.setObject(x, y, ' ');
-            y++;
-            mars.setObject(x, y, heading);
+            if (mars.isInsideMap(x, y+1)) {
+                mars.setObject(x, y, '$');
+                y++;
+                mars.setObject(x, y, '$');
+            }
+            else
+                heading = '>';
         break;
         case 'v':
-            mars.setObject(x, y, ' ');
-            y--;
-            mars.setObject(x, y, heading);
+            if (mars.isInsideMap(x, y-1)) {
+                mars.setObject(x, y, '$');
+                y--;
+                mars.setObject(x, y, '$');
+            }
+            else
+                heading = '>';
         break;
         case '>':
-            mars.setObject(x, y, ' ');
-            x++;
-            mars.setObject(x, y, heading);
+            if (mars.isInsideMap(x+1, y)) {
+                mars.setObject(x, y, '$');
+                x++;
+                mars.setObject(x, y, '$');
+            }
+            else    
+                heading = 'v';
         break;
         case '<':
-            mars.setObject(x, y, ' ');
-            x--;
-            mars.setObject(x, y, heading);
+            if (mars.isInsideMap(x-1, y)) {
+                mars.setObject(x, y, '$');
+                x--;
+                mars.setObject(x, y, '$');
+            }
+            else    
+                heading = '^';
         break;
     }
 }
@@ -398,14 +417,10 @@ bool Rover::isGold(Mars &mars, Rover &rover, int &gold) {
 //
 // generate gold
 void Rover::generateGold(Mars &mars, Rover &rover) {
-    int tempX = x, tempY = y;
-    for (int i=0; i<5; i++) {
-        rover.moveRoverGod(mars,rover);
-        rover.moveRoverGod(mars,rover);
-        mars.setObject(x+1,y+1,'$');
+    for (int i=0; i<10; i++) {
+        for (int j=0; j<5; j++)
+            rover.moveRoverGod(mars,rover);
     }
-    x = tempX;
-    y = tempY;
 }
 
 void startGame();
@@ -459,15 +474,15 @@ void startGame() {
 
     rover.land(mars);
 
-    //rover.generateGold(mars,rover);
-    //rover.land(mars);
+    rover.generateGold(mars,rover);
+    rover.land(mars);
     mars.display();
 
     rover.getRoverLocation();
     cout << "current heading is [" << rover.getHeading() << "]" << "\n\n";
     cout << "current gold collected = " << gold << endl;
 
-    getInput(mars, rover,gold);
+    getInput(mars,rover,gold);
 }
 
 int main() {
