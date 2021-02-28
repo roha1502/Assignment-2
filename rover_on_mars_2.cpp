@@ -313,9 +313,7 @@ void Rover::moveRoverGod(Mars &mars, Rover &rover, char t) {    // - moves with 
 //
 // generate gold (with rover) *using rover to generate gold ensures that the gold is reachable
 void Rover::generateGold(Mars &mars, Rover &rover) {
-    int t = 0, t2, gold;
-    cout << "enter amounts of gold:\n==> ";
-    cin >> gold;
+    int t = 0, t2, gold = mars.getDimX() / 2;
 
     char possibleHeading[] = {'^', '>', '<', 'v'};
     while (mars.sufficientGold() < gold) {
@@ -325,7 +323,7 @@ void Rover::generateGold(Mars &mars, Rover &rover) {
                 rover.moveRoverGod(mars, rover, '$');
                 t++;
             }
-            else if (t2 >= 3 && t2 < 8)
+            else if (t2 >= 3 && t2 < 9)
                 rover.moveRoverGod(mars, rover, ' ');
             else
                 rover.moveRoverGod(mars, rover, '#');
