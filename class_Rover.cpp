@@ -22,11 +22,12 @@ class Rover {
         char getHeading();
         int getDimX();
         int getDimY();
+        bool isTrap(Mars &mars);
         bool ableToMove(Mars &mars);
         void moveRover(Mars &mars, Rover &rover);
-        void roverGoldMode(Mars &mars, Rover &rover, char);
         void turnRoverRight(Mars &mars, Rover &rover);
         void turnRoverLeft(Mars &mars, Rover &rover);
+        void roverGoldMode(Mars &mars, Rover &rover, char);
         void generateGold(Mars &mars, Rover &rover);
 };
 
@@ -58,6 +59,40 @@ int Rover::getDimX() {
 // return rover's y-coordinate
 int Rover::getDimY() {
     return y;
+}
+
+//
+// is the cell in front of the rover a trap ?
+bool Rover::isTrap(Mars &mars) {
+    switch(heading) {                                   // - calls mars.isTrap() with the coordinates being
+            case '^':                                   //   the cell directly in front of the rover
+                if (mars.isTrap(x, y+1))
+                    return true;
+                else
+                    return false;
+            break;
+            case 'v':
+                if (mars.isTrap(x, y-1)) 
+                    return true;
+                else
+                    return false;
+            break;
+            case '>':
+                if (mars.isTrap(x+1, y))
+                    return true;
+                else
+                    return false;
+            break;
+            case '<':
+                if (mars.isTrap(x-1, y))
+                    return true;
+                else
+                    return false;
+            break;
+            default:
+                return false;
+            break;
+    }
 }
 
 //
@@ -122,7 +157,7 @@ void Rover::moveRover(Mars &mars, Rover &rover) {
         }
     }
     else
-        cout << "rover cannot move there !";
+        cout << "\nrover cannot move there !";
 }
 
 //

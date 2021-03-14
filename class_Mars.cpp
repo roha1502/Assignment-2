@@ -38,8 +38,33 @@ class Mars {
 void Mars::init() {
     cout << "enter x-dimension:\n==> ";
     cin >> dimX;
+    while (!cin) {
+        cout << "invalid input !\nenter x-dimension:\n==> ";
+        cin.clear();
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cin >> dimX;
+    }
+    while (dimX < 4) {
+        cout << "must be at least 2 !\nenter x-dimension:\n==> ";
+        cin.clear();
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cin >> dimX;
+    }
+
     cout << "enter y-dimension:\n==> ";
     cin >> dimY;
+    while (!cin) {
+        cout << "invalid input !\nenter y-dimension:\n==> ";
+        cin.clear();
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cin >> dimY;
+    }
+    while (dimY < 4) {
+        cout << "must be at least 2 !\nenter y-dimension:\n==> ";
+        cin.clear();
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cin >> dimY;
+    }
 
     char objects[] = {' ', ' ', ' ', ' ', ' ', ' ',
                       '@', '@', '#', '#'};

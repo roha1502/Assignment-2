@@ -13,7 +13,7 @@ using namespace std;
 // Player Map class                     //   to create a map whose cells are hidden by '?', only revealing the cells as
 //                                      //   the player moves through the map
 class PlayerMap {                       // - revealCells() is the only new function exclusive to this class, others are
-    private:                            //   simply slightly modified versions carried over from Rover and Mars
+    private:                            //   slightly modified versions carried over from Rover and Mars class
         vector<vector<char>> map;
         int dimX, dimY;
     public:
@@ -84,7 +84,7 @@ void PlayerMap::display() {
 }
 
 //
-// move the rover in the player map accordingly to the actual rover in the actual
+// move the rover in the player map accordingly to the actual rover in the actual map
 void PlayerMap::moveRover(Mars &mars, Rover &rover, PlayerMap &pm) {
     if (rover.ableToMove(mars)) {
         switch(rover.getHeading()) {
